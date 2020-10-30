@@ -18,8 +18,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
         window?.backgroundColor = defaultBackground
         
-        let navigationController = UINavigationController(rootViewController: SearchViewController())
-        window?.rootViewController = navigationController
+        let tabBarController = UITabBarController()
+        
+        let searchNavigationController = UINavigationController(rootViewController: SearchViewController())
+        searchNavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 0)
+        let favoritesNavigationController = UINavigationController(rootViewController: FavoritesViewController())
+        favoritesNavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .favorites, tag: 1)
+        tabBarController.viewControllers = [searchNavigationController, favoritesNavigationController]
+        
+        window?.rootViewController = tabBarController
         
         return true
     }
