@@ -9,10 +9,10 @@ import UIKit
 
 class SearchViewController: UIViewController {
     
-    private var repos = ["first nice repo", "second repo", "my project", "qwertyPas", "FavRepo"]
+    private var defaultRepos = ["first nice repo", "second repo", "my project", "qwertyPas", "FavRepo"]
     
-    private var searchResult = [String]()
-    private lazy var resultsTable: UITableView = {
+    private var repos = [String]()
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
@@ -28,8 +28,8 @@ class SearchViewController: UIViewController {
         setupSearchcontroller()
         layout()
         
-        searchResult = repos
-        resultsTable.reloadData()
+        repos = defaultRepos
+        tableView.reloadData()
     }
     
     private func setupSearchcontroller() {
@@ -43,13 +43,13 @@ class SearchViewController: UIViewController {
     }
     
     private func layout() {
-        view.addSubview(resultsTable)
-        resultsTable.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            resultsTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            resultsTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            resultsTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            resultsTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ])
     }
     
@@ -62,11 +62,11 @@ extension SearchViewController: UISearchResultsUpdating {
     public func updateSearchResults(for searchController: UISearchController) {
         if let searchText = searchController.searchBar.text,
            !searchText.isEmpty {
-            searchResult = repos.filter { $0.lowercased().contains(searchText.lowercased()) }
-            resultsTable.reloadData()
+            repos = defaultRepos.filter { $0.lowercased().contains(searchText.lowercased()) }
+            tableView.reloadData()
         } else {
-            searchResult = repos
-            resultsTable.reloadData()
+            repos = defaultRepos
+            tableView.reloadData()
         }
     }
     
@@ -75,12 +75,12 @@ extension SearchViewController: UISearchResultsUpdating {
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchResult.count
+        return repos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: repositoryCellIdentifier, for: indexPath)
-        cell.textLabel?.text = searchResult[indexPath.row]
+        cell.textLabel?.text = repos[indexPath.row]
         return cell
     }
     
