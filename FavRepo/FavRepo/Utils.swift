@@ -14,3 +14,11 @@ var defaultBackground: UIColor {
         return .white
     }
 }
+
+func getUILabel(withTextStyle style: UIFont.TextStyle, text: String? = nil) -> UILabel {
+    let label = UILabel()
+    label.font = UIFont.preferredFont(forTextStyle: style)
+    label.adjustsFontForContentSizeCategory = true
+    label.text = text
+    return label
+}
