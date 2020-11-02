@@ -87,6 +87,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: repositoryCellIdentifier, for: indexPath)
+        cell.selectionStyle = .none
         cell.textLabel?.text = searchRequest?.result[indexPath.row].fullName
         return cell
     }

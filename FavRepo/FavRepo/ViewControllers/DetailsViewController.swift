@@ -102,16 +102,21 @@ class DetailsViewController: UIViewController {
     
     @objc
     private func favorite() {
-        repository?.isFavorite.toggle()
+        repository?.toggleIsFavorite()
         updateFavoriteButton()
     }
     
-    private func updateFavoriteButton() {
+    private func updateFavoriteButton(animated: Bool = true) {
         if let favButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
-            UIView.transition(with: favButton, duration: 0.75, options: .transitionCrossDissolve) {
+            UIView.transition(with: favButton, duration: animated ? 0.25 : 0, options: .transitionCrossDissolve) {
                 favButton.setTitleColor((self.repository?.isFavorite ?? false) ? .systemYellow : .systemBlue, for: .normal)
             }
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateFavoriteButton(animated: false)
     }
     
 }

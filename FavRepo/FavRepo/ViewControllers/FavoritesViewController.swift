@@ -9,7 +9,9 @@ import UIKit
 
 class FavoritesViewController: UIViewController {
     
-    private var favorites = ["first nice repo", "my project", "qwertyPas", "FavRepo"]
+    private var favorites: [Repository] {
+        return RepositoryService.shared.favorites.sorted { $0.fullName > $1.fullName }
+    }
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -23,6 +25,8 @@ class FavoritesViewController: UIViewController {
         super.viewDidLoad()
         
         title = "Favorites"
+        
+        RepositoryService.shared.favoritesDelegate = self
         
         layout()
     }
@@ -50,13 +54,23 @@ extension FavoritesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: repositoryCellIdentifier, for: indexPath)
-        cell.textLabel?.text = favorites[indexPath.row]
+        cell.selectionStyle = .none
+        cell.textLabel?.text = favorites[indexPath.row].fullName
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = DetailsViewController()
+        vc.repository = favorites[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+}
+
+extension FavoritesViewController: FavoritesDelegate {
+    
+    func favoritesList(didChangeStateFor repository: Repository) {
+        tableView.reloadData()
     }
     
 }
