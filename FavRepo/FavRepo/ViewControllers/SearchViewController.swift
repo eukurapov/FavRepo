@@ -9,9 +9,7 @@ import UIKit
 
 class SearchViewController: UIViewController {
     
-    private var defaultRepos = ["first nice repo", "second repo", "my project", "qwertyPas", "FavRepo"]
-    
-    private var repos = [String]()
+    private var searchRequest: SearchRequest?
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.delegate = self
@@ -27,14 +25,11 @@ class SearchViewController: UIViewController {
         
         setupSearchcontroller()
         layout()
-        
-        repos = defaultRepos
-        tableView.reloadData()
     }
     
     private func setupSearchcontroller() {
         let searchController = UISearchController()
-        searchController.searchResultsUpdater = self
+        searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search Repositories"
         searchController.hidesNavigationBarDuringPresentation = false
@@ -57,15 +52,23 @@ class SearchViewController: UIViewController {
 
 }
 
-extension SearchViewController: UISearchResultsUpdating {
+extension SearchViewController: UISearchBarDelegate {
     
-    public func updateSearchResults(for searchController: UISearchController) {
-        if let searchText = searchController.searchBar.text,
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let searchText = searchBar.text,
            !searchText.isEmpty {
-            repos = defaultRepos.filter { $0.lowercased().contains(searchText.lowercased()) }
-            tableView.reloadData()
+            searchRequest = SearchRequest(for: searchText)
+            searchRequest?.fetch { [weak self, searchText] result in
+                guard searchText == self?.searchRequest?.query else { return }
+                switch result {
+                case .success(_):
+                    self?.tableView.reloadData()
+                case .failure(let error):
+                    print(error)
+                }
+            }
         } else {
-            repos = defaultRepos
+            searchRequest = nil
             tableView.reloadData()
         }
     }
@@ -75,12 +78,16 @@ extension SearchViewController: UISearchResultsUpdating {
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return repos.count
+        if let searchRequest = searchRequest {
+            return searchRequest.result.count
+        } else {
+            return 0
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: repositoryCellIdentifier, for: indexPath)
-        cell.textLabel?.text = repos[indexPath.row]
+        cell.textLabel?.text = searchRequest?.result[indexPath.row].fullName
         return cell
     }
     
