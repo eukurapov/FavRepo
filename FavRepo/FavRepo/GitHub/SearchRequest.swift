@@ -27,6 +27,9 @@ class SearchRequest {
     
     var query: String
     var result = [Repository]()
+    var isFullyLoaded: Bool {
+        return result.count == total
+    }
     
     var total = 0
     private var loadedPages = 0

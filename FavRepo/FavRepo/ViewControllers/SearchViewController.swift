@@ -85,7 +85,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let searchRequest = searchRequest {
-            return searchRequest.result.count + 1
+            return searchRequest.isFullyLoaded ? searchRequest.result.count : searchRequest.result.count + 1
         } else {
             return 0
         }
