@@ -14,6 +14,7 @@ class SearchViewController: UIViewController {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.prefetchDataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: repositoryCellIdentifier)
         return tableView
     }()
@@ -48,6 +49,19 @@ class SearchViewController: UIViewController {
         ])
     }
     
+    func fetch() {
+        let searchText = searchRequest?.query
+        searchRequest?.fetch { [weak self, searchText] result in
+            guard searchText == self?.searchRequest?.query else { return }
+            switch result {
+            case .success(_):
+                self?.tableView.reloadData()
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
     private let repositoryCellIdentifier = "Repository"
 
 }
@@ -58,15 +72,7 @@ extension SearchViewController: UISearchBarDelegate {
         if let searchText = searchBar.text,
            !searchText.isEmpty {
             searchRequest = SearchRequest(for: searchText)
-            searchRequest?.fetch { [weak self, searchText] result in
-                guard searchText == self?.searchRequest?.query else { return }
-                switch result {
-                case .success(_):
-                    self?.tableView.reloadData()
-                case .failure(let error):
-                    print(error)
-                }
-            }
+            fetch()
         } else {
             searchRequest = nil
             tableView.reloadData()
@@ -79,7 +85,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let searchRequest = searchRequest {
-            return searchRequest.result.count
+            return searchRequest.result.count + 1
         } else {
             return 0
         }
@@ -88,14 +94,37 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: repositoryCellIdentifier, for: indexPath)
         cell.selectionStyle = .none
-        cell.textLabel?.text = searchRequest?.result[indexPath.row].fullName
+        if isLoadingCell(for: indexPath) {
+            cell.textLabel?.text = "Loading …"
+        } else {
+            cell.textLabel?.text = searchRequest?.result[indexPath.row].fullName
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !isLoadingCell(for: indexPath) else { return }
         let vc = DetailsViewController()
         vc.repository = searchRequest?.result[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+}
+
+extension SearchViewController: UITableViewDataSourcePrefetching {
+    
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        if indexPaths.contains(where: isLoadingCell) {
+            fetch()
+        }
+    }
+    
+}
+
+private extension SearchViewController {
+    
+    func isLoadingCell(for indexPath: IndexPath) -> Bool {
+        return indexPath.item >= (searchRequest?.result.count ?? 0)
     }
     
 }

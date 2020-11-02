@@ -8,7 +8,13 @@
 import Foundation
 
 struct SearchResult: Codable {
+    var total: Int
     var items: [Repository]
+    
+    enum CodingKeys: String, CodingKey {
+        case total = "total_count"
+        case items
+    }
 }
 
 enum SearchError: Error {
@@ -22,6 +28,9 @@ class SearchRequest {
     var query: String
     var result = [Repository]()
     
+    var total = 0
+    private var loadedPages = 0
+    
     private var dataTask: URLSessionDataTask?
     
     init(for query: String) {
@@ -31,7 +40,7 @@ class SearchRequest {
     func fetch(completion: @escaping (Result<[Repository], Error>) -> Void) {
         dataTask?.cancel()
         
-        guard let url = URL(string: "https://api.github.com/search/repositories?q=\(query)&order=desc") else { return }
+        guard let url = URL(string: "https://api.github.com/search/repositories?q=\(query)&order=desc&page=\(loadedPages+1)") else { return }
         
         dataTask = URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
             defer {
@@ -54,6 +63,8 @@ class SearchRequest {
                 do {
                     let searchResult = try JSONDecoder().decode(SearchResult.self, from: data)
                     self?.result.append(contentsOf: searchResult.items)
+                    self?.loadedPages += 1
+                    self?.total = searchResult.total
                     DispatchQueue.main.async {
                         completion(Result.success(searchResult.items))
                     }
