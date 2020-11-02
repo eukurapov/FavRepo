@@ -9,7 +9,11 @@ import Foundation
 
 class RepositoryService {
     
-    static let shared = RepositoryService()
+    static let shared: RepositoryService = {
+        let service = RepositoryService()
+        service.loadFavorites()
+        return service
+    }()
     
     private(set) var favorites = Set<Repository>()
     var favoritesDelegate: FavoritesDelegate?
@@ -56,17 +60,62 @@ class RepositoryService {
     func likeRepository(_ repository: Repository) {
         favorites.insert(repository)
         favoritesDelegate?.favoritesList(didChangeStateFor: repository)
+        saveFavorites()
     }
     
     func unlikeRepository(_ repository: Repository) {
         favorites.remove(repository)
         favoritesDelegate?.favoritesList(didChangeStateFor: repository)
+        saveFavorites()
     }
+    
+    private let favoritesFileName: String = "favorites"
     
 }
 
 protocol FavoritesDelegate {
-    
     func favoritesList(didChangeStateFor repository: Repository)
+}
+
+extension RepositoryService {
+    
+    var favoritesFileURL: URL {
+        let fileManager = FileManager.default
+        return fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("\(favoritesFileName).json")
+    }
+    
+    func loadFavorites(completion: ((Bool) -> Void)? = nil) {
+        let url = favoritesFileURL
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let data = try Data(contentsOf: url)
+                if let repositories = try? JSONDecoder().decode(Set<Repository>.self, from: data) {
+                    self.favorites = repositories
+                    DispatchQueue.main.async {
+                        completion?(true)
+                    }
+                    return
+                }
+            } catch {
+                print(error)
+            }
+            DispatchQueue.main.async {
+                completion?(false)
+            }
+        }
+    }
+    
+    private func saveFavorites() {
+        let url = favoritesFileURL
+        DispatchQueue.global(qos: .background).async {
+            if let data = try? JSONEncoder().encode(self.favorites) {
+                do {
+                    try data.write(to: url)
+                } catch {
+                    print(error)
+                }
+            }
+        }
+    }
     
 }

@@ -36,7 +36,7 @@ class DetailsViewController: UIViewController {
         let favoriteButton = UIButton()
         favoriteButton.setTitle("★", for: .normal)
         favoriteButton.titleLabel?.font = UIFont.systemFont(ofSize: UIFont.systemFontSize*1.5)
-        favoriteButton.setTitleColor(.systemBlue, for: .normal)
+        favoriteButton.setTitleColor((repository?.isFavorite ?? false) ? .systemYellow : .systemBlue, for: .normal)
         favoriteButton.addTarget(self, action: #selector(favorite), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: favoriteButton)
         
