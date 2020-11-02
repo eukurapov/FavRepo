@@ -9,14 +9,7 @@ import UIKit
 
 class DetailsViewController: UIViewController {
     
-    var repo: (name: String, description: String, owner: String, email: String)! {
-        didSet {
-            title = repo.name
-            descriptionLabel.text = repo.description
-            ownerLabel.text = repo.owner
-            emailLabel.text = repo.email
-        }
-    }
+    var repository: Repository?
     
     private var descriptionLabel: UILabel = {
         let label = getUILabel(withTextStyle: .body)
@@ -27,29 +20,27 @@ class DetailsViewController: UIViewController {
     private var ownerLabel: UILabel = getUILabel(withTextStyle: .body)
     private var emailTitleLabel: UILabel = getUILabel(withTextStyle: .headline, text: "Email:")
     private var emailLabel: UILabel = getUILabel(withTextStyle: .body)
-    
-    private var isFavorite = false
+    private var activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView()
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = defaultBackground
         
-        repo = (
-            name: "Some repo",
-            description: "Here is a text with some detials about this super project",
-            owner: "Vasily Petrovich",
-            email: "vasya@dev.net"
-        )
-        
         layout()
         
         let favoriteButton = UIButton()
         favoriteButton.setTitle("★", for: .normal)
         favoriteButton.titleLabel?.font = UIFont.systemFont(ofSize: UIFont.systemFontSize*1.5)
-        favoriteButton.setTitleColor(isFavorite ? .systemYellow : .systemBlue, for: .normal)
+        favoriteButton.setTitleColor(.systemBlue, for: .normal)
         favoriteButton.addTarget(self, action: #selector(favorite), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: favoriteButton)
+        
+        updateRepositoryDetails()
     }
     
     private func layout() {
@@ -58,11 +49,13 @@ class DetailsViewController: UIViewController {
         view.addSubview(ownerLabel)
         view.addSubview(emailTitleLabel)
         view.addSubview(emailLabel)
+        view.addSubview(activityIndicator)
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         ownerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         ownerLabel.translatesAutoresizingMaskIntoConstraints = false
         emailTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         emailLabel.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             descriptionLabel.topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 2),
             descriptionLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1),
@@ -79,15 +72,44 @@ class DetailsViewController: UIViewController {
             emailLabel.centerYAnchor.constraint(equalTo: emailTitleLabel.centerYAnchor),
             emailLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: emailTitleLabel.trailingAnchor, multiplier: 1),
             view.safeAreaLayoutGuide.trailingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: emailLabel.trailingAnchor, multiplier: 1),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
         ])
+    }
+    
+    private func updateRepositoryDetails() {
+        if let repository = repository {
+            title = repository.fullName
+            descriptionLabel.text = repository.description
+            activityIndicator.startAnimating()
+            RepositoryService.shared.fetchDetailsForUserLogin(repository.owner.login) { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success(let user):
+                    guard user.id == self.repository?.owner.id else { return }
+                    self.repository?.owner = user
+                    self.ownerLabel.text = user.name ?? user.login
+                    self.emailLabel.text = user.email ?? "N/A"
+                case .failure(let error):
+                    print(error)
+                }
+                self.activityIndicator.stopAnimating()
+            }
+            updateFavoriteButton()
+        }
     }
     
     @objc
     private func favorite() {
-        isFavorite.toggle()
+        repository?.isFavorite.toggle()
+        updateFavoriteButton()
+    }
+    
+    private func updateFavoriteButton() {
         if let favButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
             UIView.transition(with: favButton, duration: 0.75, options: .transitionCrossDissolve) {
-                favButton.setTitleColor(self.isFavorite ? .systemYellow : .systemBlue, for: .normal)
+                favButton.setTitleColor((self.repository?.isFavorite ?? false) ? .systemYellow : .systemBlue, for: .normal)
             }
         }
     }

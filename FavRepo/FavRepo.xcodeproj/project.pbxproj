@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		445F39B4254C515E00FACEE5 /* DetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F39B3254C515E00FACEE5 /* DetailsViewController.swift */; };
+		44889F0A2550274A00AEC745 /* RepositoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44889F092550274A00AEC745 /* RepositoryService.swift */; };
+		44889F0D2550281300AEC745 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44889F0C2550281300AEC745 /* User.swift */; };
 		44A51932254C2428003DD16B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A51931254C2428003DD16B /* AppDelegate.swift */; };
 		44A51936254C2428003DD16B /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A51935254C2428003DD16B /* SearchViewController.swift */; };
 		44A5193B254C242A003DD16B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44A5193A254C242A003DD16B /* Assets.xcassets */; };
@@ -20,6 +22,8 @@
 
 /* Begin PBXFileReference section */
 		445F39B3254C515E00FACEE5 /* DetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewController.swift; sourceTree = "<group>"; };
+		44889F092550274A00AEC745 /* RepositoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryService.swift; sourceTree = "<group>"; };
+		44889F0C2550281300AEC745 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		44A5192E254C2428003DD16B /* FavRepo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FavRepo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A51931254C2428003DD16B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44A51935254C2428003DD16B /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
@@ -96,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				44E3F4D8254C6DC900F7D056 /* Repository.swift */,
+				44889F0C2550281300AEC745 /* User.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -104,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				44E3F4DD254C701900F7D056 /* SearchRequest.swift */,
+				44889F092550274A00AEC745 /* RepositoryService.swift */,
 			);
 			path = GitHub;
 			sourceTree = "<group>";
@@ -180,7 +186,9 @@
 				44A51936254C2428003DD16B /* SearchViewController.swift in Sources */,
 				44A51932254C2428003DD16B /* AppDelegate.swift in Sources */,
 				44A51950254C2905003DD16B /* FavoritesViewController.swift in Sources */,
+				44889F0A2550274A00AEC745 /* RepositoryService.swift in Sources */,
 				44A5194C254C2728003DD16B /* Utils.swift in Sources */,
+				44889F0D2550281300AEC745 /* User.swift in Sources */,
 				445F39B4254C515E00FACEE5 /* DetailsViewController.swift in Sources */,
 				44E3F4D9254C6DC900F7D056 /* Repository.swift in Sources */,
 				44E3F4DE254C701900F7D056 /* SearchRequest.swift in Sources */,

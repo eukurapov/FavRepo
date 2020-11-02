@@ -93,6 +93,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = DetailsViewController()
+        vc.repository = searchRequest?.result[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
     }
     

@@ -12,15 +12,8 @@ struct Repository: Codable {
     var id: Int
     var fullName: String
     var description: String?
-    var owner: Owner
+    var owner: User
     var isFavorite: Bool = false
-    
-    struct Owner: Codable {
-        var id: Int
-        var login: String
-        var name: String?
-        var email: String?
-    }
     
     enum CodingKeys: String, CodingKey {
         case id
