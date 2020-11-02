@@ -18,6 +18,11 @@ class SearchViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: repositoryCellIdentifier)
         return tableView
     }()
+    private lazy var placeholderView: LoadingView = {
+        let view = LoadingView()
+        view.message = "No Results"
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,24 +45,40 @@ class SearchViewController: UIViewController {
     
     private func layout() {
         view.addSubview(tableView)
+        view.addSubview(placeholderView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        placeholderView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            
+            placeholderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            placeholderView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            placeholderView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            placeholderView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ])
     }
     
     func fetch() {
         let searchText = searchRequest?.query
+        if searchRequest?.result.isEmpty ?? true {
+            placeholderView.isHidden = false
+            placeholderView.start()
+            tableView.reloadData()
+        }
         searchRequest?.fetch { [weak self, searchText] result in
             guard searchText == self?.searchRequest?.query else { return }
             switch result {
             case .success(_):
                 self?.tableView.reloadData()
+                self?.placeholderView.stop()
+                self?.placeholderView.isHidden = true
             case .failure(let error):
                 print(error)
+                self?.placeholderView.stop()
+                self?.placeholderView.message = "Could not perform request, please try again later"
             }
         }
     }
