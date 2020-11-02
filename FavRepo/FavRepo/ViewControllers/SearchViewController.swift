@@ -100,6 +100,15 @@ extension SearchViewController: UISearchBarDelegate {
         }
     }
     
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            searchRequest = nil
+            tableView.reloadData()
+            placeholderView.message = "No Results"
+            placeholderView.isHidden = false
+        }
+    }
+    
 }
 
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
