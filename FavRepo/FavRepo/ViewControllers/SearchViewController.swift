@@ -25,6 +25,13 @@ class SearchViewController: UIViewController {
     }()
     
     private var searchTimer: Timer?
+    
+    private lazy var tapRecognizer: UITapGestureRecognizer = {
+      var recognizer = UITapGestureRecognizer(
+        target:navigationItem.searchController?.searchBar,
+        action: #selector(resignFirstResponder))
+      return recognizer
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,6 +112,14 @@ extension SearchViewController: UISearchBarDelegate {
             searchRequest = nil
             tableView.reloadData()
         }
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+      view.addGestureRecognizer(tapRecognizer)
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+      view.removeGestureRecognizer(tapRecognizer)
     }
 
 }
