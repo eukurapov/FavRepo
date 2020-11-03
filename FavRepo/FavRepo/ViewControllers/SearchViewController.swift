@@ -23,6 +23,8 @@ class SearchViewController: UIViewController {
         view.message = "No Results"
         return view
     }()
+    
+    private var searchTimer: Timer?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +38,7 @@ class SearchViewController: UIViewController {
     private func setupSearchcontroller() {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.searchBar.delegate = self
+        searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search Repositories"
         searchController.hidesNavigationBarDuringPresentation = false
@@ -84,7 +87,10 @@ class SearchViewController: UIViewController {
         }
     }
     
-    private let repositoryCellIdentifier = "Repository"
+    // MARK: - Constant Values
+    
+    private let repositoryCellIdentifier: String = "Repository"
+    private let searchDelay: TimeInterval = 0.75
 
 }
 
@@ -100,16 +106,7 @@ extension SearchViewController: UISearchBarDelegate {
             tableView.reloadData()
         }
     }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchText.isEmpty {
-            searchRequest = nil
-            tableView.reloadData()
-            placeholderView.message = "No Results"
-            placeholderView.isHidden = false
-        }
-    }
-    
+
 }
 
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
@@ -156,6 +153,26 @@ private extension SearchViewController {
     
     func isLoadingCell(for indexPath: IndexPath) -> Bool {
         return indexPath.item >= (searchRequest?.result.count ?? 0)
+    }
+    
+}
+
+extension SearchViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        searchTimer?.invalidate()
+        searchTimer = Timer.scheduledTimer(withTimeInterval: searchDelay, repeats: false) { _ in
+            if let searchText = searchController.searchBar.text,
+               !searchText.isEmpty {
+                self.searchRequest = SearchRequest(for: searchText)
+                self.fetch()
+            } else {
+                self.searchRequest = nil
+                self.tableView.reloadData()
+                self.placeholderView.message = "No Results"
+                self.placeholderView.isHidden = false
+            }
+        }
     }
     
 }
