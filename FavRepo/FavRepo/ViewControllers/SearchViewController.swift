@@ -76,6 +76,7 @@ class SearchViewController: UIViewController {
         let searchText = searchRequest?.query
         if searchRequest?.result.isEmpty ?? true {
             placeholderView.isHidden = false
+            navigationItem.hidesSearchBarWhenScrolling = false
             placeholderView.start()
             tableView.reloadData()
         }
@@ -86,6 +87,7 @@ class SearchViewController: UIViewController {
                 self?.tableView.reloadData()
                 self?.placeholderView.stop()
                 self?.placeholderView.isHidden = true
+                self?.navigationItem.hidesSearchBarWhenScrolling = true
             case .failure(let error):
                 print(error)
                 self?.placeholderView.stop()
@@ -108,18 +110,15 @@ extension SearchViewController: UISearchBarDelegate {
            !searchText.isEmpty {
             searchRequest = SearchRequest(for: searchText)
             fetch()
-        } else {
-            searchRequest = nil
-            tableView.reloadData()
         }
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-      view.addGestureRecognizer(tapRecognizer)
+      //view.addGestureRecognizer(tapRecognizer)
     }
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-      view.removeGestureRecognizer(tapRecognizer)
+      //view.removeGestureRecognizer(tapRecognizer)
     }
 
 }
@@ -176,17 +175,17 @@ extension SearchViewController: UISearchResultsUpdating {
     
     func updateSearchResults(for searchController: UISearchController) {
         searchTimer?.invalidate()
-        searchTimer = Timer.scheduledTimer(withTimeInterval: searchDelay, repeats: false) { _ in
-            if let searchText = searchController.searchBar.text,
-               !searchText.isEmpty {
+        if let searchText = searchController.searchBar.text,
+           !searchText.isEmpty {
+            searchTimer = Timer.scheduledTimer(withTimeInterval: searchDelay, repeats: false) { _ in
                 self.searchRequest = SearchRequest(for: searchText)
                 self.fetch()
-            } else {
-                self.searchRequest = nil
-                self.tableView.reloadData()
-                self.placeholderView.message = "No Results"
-                self.placeholderView.isHidden = false
             }
+        } else {
+            searchRequest = nil
+            tableView.reloadData()
+            placeholderView.message = "No Results"
+            placeholderView.isHidden = false
         }
     }
     
