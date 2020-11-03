@@ -11,15 +11,24 @@ class DetailsViewController: UIViewController {
     
     var repository: Repository?
     
+    private var scrollView = UIScrollView()
     private var descriptionLabel: UILabel = {
         let label = getUILabel(withTextStyle: .body)
         label.numberOfLines = 0
         return label
     }()
     private var ownerTitleLabel: UILabel = getUILabel(withTextStyle: .headline, text: "Owner:")
-    private var ownerLabel: UILabel = getUILabel(withTextStyle: .body)
+    private var ownerLabel: UILabel = {
+        let label = getUILabel(withTextStyle: .body)
+        label.numberOfLines = 0
+        return label
+    }()
     private var emailTitleLabel: UILabel = getUILabel(withTextStyle: .headline, text: "Email:")
-    private var emailLabel: UILabel = getUILabel(withTextStyle: .body)
+    private var emailLabel: UILabel = {
+        let label = getUILabel(withTextStyle: .body)
+        label.numberOfLines = 0
+        return label
+    }()
     private var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
         indicator.hidesWhenStopped = true
@@ -45,12 +54,14 @@ class DetailsViewController: UIViewController {
     }
     
     private func layout() {
-        view.addSubview(descriptionLabel)
-        view.addSubview(ownerTitleLabel)
-        view.addSubview(ownerLabel)
-        view.addSubview(emailTitleLabel)
-        view.addSubview(emailLabel)
+        view.addSubview(scrollView)
+        scrollView.addSubview(descriptionLabel)
+        scrollView.addSubview(ownerTitleLabel)
+        scrollView.addSubview(ownerLabel)
+        scrollView.addSubview(emailTitleLabel)
+        scrollView.addSubview(emailLabel)
         view.addSubview(activityIndicator)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         ownerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         ownerLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -58,21 +69,27 @@ class DetailsViewController: UIViewController {
         emailLabel.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            descriptionLabel.topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 2),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            view.safeAreaLayoutGuide.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            scrollView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
+            
+            descriptionLabel.topAnchor.constraint(equalToSystemSpacingBelow: scrollView.topAnchor, multiplier: 2),
             descriptionLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1),
             view.safeAreaLayoutGuide.trailingAnchor.constraint(equalToSystemSpacingAfter: descriptionLabel.trailingAnchor, multiplier: 1),
             
             ownerTitleLabel.topAnchor.constraint(equalToSystemSpacingBelow: descriptionLabel.bottomAnchor, multiplier: 2),
             ownerTitleLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1),
-            ownerLabel.centerYAnchor.constraint(equalTo: ownerTitleLabel.centerYAnchor),
+            ownerLabel.topAnchor.constraint(equalTo: ownerTitleLabel.topAnchor),
             ownerLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: ownerTitleLabel.trailingAnchor, multiplier: 1),
             view.safeAreaLayoutGuide.trailingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: ownerLabel.trailingAnchor, multiplier: 1),
             
-            emailTitleLabel.topAnchor.constraint(equalToSystemSpacingBelow: ownerTitleLabel.bottomAnchor, multiplier: 2),
+            emailTitleLabel.topAnchor.constraint(equalToSystemSpacingBelow: ownerLabel.bottomAnchor, multiplier: 2),
             emailTitleLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1),
-            emailLabel.centerYAnchor.constraint(equalTo: emailTitleLabel.centerYAnchor),
+            emailLabel.topAnchor.constraint(equalTo: emailTitleLabel.topAnchor),
             emailLabel.leadingAnchor.constraint(equalToSystemSpacingAfter: emailTitleLabel.trailingAnchor, multiplier: 1),
             view.safeAreaLayoutGuide.trailingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: emailLabel.trailingAnchor, multiplier: 1),
+            scrollView.bottomAnchor.constraint(equalToSystemSpacingBelow: emailTitleLabel.bottomAnchor, multiplier: 1),
             
             activityIndicator.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
