@@ -83,8 +83,7 @@ class SearchViewController: UIViewController {
                     self?.tableView.reloadData()
                     self?.placeholderView.isHidden = true
                 }
-            case .failure(let error):
-                print(error)
+            case .failure(_):
                 self?.placeholderView.stop()
                 self?.placeholderView.message = "Could not perform request, please try again later"
             }

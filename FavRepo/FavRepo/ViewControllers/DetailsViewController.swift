@@ -109,8 +109,9 @@ class DetailsViewController: UIViewController {
                     self.repository?.owner = user
                     self.ownerLabel.text = user.name ?? user.login
                     self.emailLabel.text = user.email ?? "N/A"
-                case .failure(let error):
-                    print(error)
+                case .failure(_):
+                    self.ownerLabel.text = "N/A"
+                    self.emailLabel.text = "N/A"
                 }
                 self.activityIndicator.stopAnimating()
             }

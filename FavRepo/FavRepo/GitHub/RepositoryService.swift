@@ -87,8 +87,7 @@ extension RepositoryService {
     func loadFavorites(completion: ((Bool) -> Void)? = nil) {
         let url = favoritesFileURL
         DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                let data = try Data(contentsOf: url)
+            if let data = try? Data(contentsOf: url) {
                 if let repositories = try? JSONDecoder().decode(Set<Repository>.self, from: data) {
                     self.favorites = repositories
                     DispatchQueue.main.async {
@@ -96,8 +95,6 @@ extension RepositoryService {
                     }
                     return
                 }
-            } catch {
-                print(error)
             }
             DispatchQueue.main.async {
                 completion?(false)
@@ -109,11 +106,7 @@ extension RepositoryService {
         let url = favoritesFileURL
         DispatchQueue.global(qos: .background).async {
             if let data = try? JSONEncoder().encode(self.favorites) {
-                do {
-                    try data.write(to: url)
-                } catch {
-                    print(error)
-                }
+                try? data.write(to: url)
             }
         }
     }
