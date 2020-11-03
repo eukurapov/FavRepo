@@ -18,6 +18,7 @@ struct SearchResult: Codable {
 }
 
 enum SearchError: Error {
+    case badRequest
     case parsing
     case server
     case unknown
@@ -43,7 +44,11 @@ class SearchRequest {
     func fetch(completion: @escaping (Result<[Repository], Error>) -> Void) {
         dataTask?.cancel()
         
-        guard let url = URL(string: "https://api.github.com/search/repositories?q=\(query)&order=desc&page=\(loadedPages+1)") else { return }
+        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://api.github.com/search/repositories?q=\(encodedQuery)&order=desc&page=\(loadedPages+1)") else {
+            completion(Result.failure(SearchError.badRequest))
+            return
+        }
         
         dataTask = URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
             defer {

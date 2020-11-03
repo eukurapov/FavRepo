@@ -25,13 +25,6 @@ class SearchViewController: UIViewController {
     }()
     
     private var searchTimer: Timer?
-    
-    private lazy var tapRecognizer: UITapGestureRecognizer = {
-      var recognizer = UITapGestureRecognizer(
-        target:navigationItem.searchController?.searchBar,
-        action: #selector(resignFirstResponder))
-      return recognizer
-    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,7 +69,6 @@ class SearchViewController: UIViewController {
         let searchText = searchRequest?.query
         if searchRequest?.result.isEmpty ?? true {
             placeholderView.isHidden = false
-            navigationItem.hidesSearchBarWhenScrolling = false
             placeholderView.start()
             tableView.reloadData()
         }
@@ -84,10 +76,13 @@ class SearchViewController: UIViewController {
             guard searchText == self?.searchRequest?.query else { return }
             switch result {
             case .success(_):
-                self?.tableView.reloadData()
                 self?.placeholderView.stop()
-                self?.placeholderView.isHidden = true
-                self?.navigationItem.hidesSearchBarWhenScrolling = true
+                if self?.searchRequest?.result.isEmpty ?? false {
+                    self?.placeholderView.message = "No Results"
+                } else {
+                    self?.tableView.reloadData()
+                    self?.placeholderView.isHidden = true
+                }
             case .failure(let error):
                 print(error)
                 self?.placeholderView.stop()
@@ -111,14 +106,6 @@ extension SearchViewController: UISearchBarDelegate {
             searchRequest = SearchRequest(for: searchText)
             fetch()
         }
-    }
-    
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-      //view.addGestureRecognizer(tapRecognizer)
-    }
-    
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-      //view.removeGestureRecognizer(tapRecognizer)
     }
 
 }
@@ -145,10 +132,15 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        navigationItem.searchController?.searchBar.resignFirstResponder()
         guard !isLoadingCell(for: indexPath) else { return }
         let vc = DetailsViewController()
         vc.repository = searchRequest?.result[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        navigationItem.searchController?.searchBar.resignFirstResponder()
     }
     
 }
@@ -177,9 +169,11 @@ extension SearchViewController: UISearchResultsUpdating {
         searchTimer?.invalidate()
         if let searchText = searchController.searchBar.text,
            !searchText.isEmpty {
-            searchTimer = Timer.scheduledTimer(withTimeInterval: searchDelay, repeats: false) { _ in
-                self.searchRequest = SearchRequest(for: searchText)
-                self.fetch()
+            if searchText != searchRequest?.query {
+                searchTimer = Timer.scheduledTimer(withTimeInterval: searchDelay, repeats: false) { _ in
+                    self.searchRequest = SearchRequest(for: searchText)
+                    self.fetch()
+                }
             }
         } else {
             searchRequest = nil
