@@ -34,13 +34,14 @@ class SearchViewController: UIViewController {
     }
     
     private func setupSearchcontroller() {
-        let searchController = UISearchController()
+        let searchController = UISearchController(searchResultsController: nil)
         searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search Repositories"
         searchController.hidesNavigationBarDuringPresentation = false
         navigationItem.hidesSearchBarWhenScrolling = false
         navigationItem.searchController = searchController
+        definesPresentationContext = true
     }
     
     private func layout() {

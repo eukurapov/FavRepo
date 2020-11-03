@@ -23,6 +23,7 @@ class DetailsViewController: UIViewController {
     private var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
         indicator.hidesWhenStopped = true
+        indicator.color = .systemGray
         return indicator
     }()
     
